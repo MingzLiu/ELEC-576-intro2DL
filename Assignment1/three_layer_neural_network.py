@@ -1,5 +1,3 @@
-__author__ = 'tan_nguyen'
-
 import numpy as np
 from sklearn import datasets, linear_model
 import matplotlib.pyplot as plt
@@ -78,10 +76,15 @@ class NeuralNetwork(object):
         :param type: Tanh, Sigmoid, or ReLU
         :return: activations
         '''
-
         # YOU IMPLMENT YOUR actFun HERE
-
-        return None
+        if type == "tanh":
+            return np.tanh(z)
+        elif type == "sigmoid":
+            return 1 / (1 + np.exp(-z))
+        elif type == "relu":
+            return np.maximum(0, z)
+        else:
+            return None
 
     def diff_actFun(self, z, type):
         '''
@@ -92,8 +95,15 @@ class NeuralNetwork(object):
         '''
 
         # YOU IMPLEMENT YOUR diff_actFun HERE
-
-        return None
+        if type == "tanh":
+            return 1 - np.power(np.tanh(z), 2)
+        elif type == "sigmoid":
+            sigmoid = 1 / (1 + np.exp(-z))
+            return sigmoid * (1 - sigmoid)
+        elif type == "relu":
+            return 1 * (z > 0)
+        else:
+            return None
 
     def feedforward(self, X, actFun):
         '''
@@ -106,10 +116,10 @@ class NeuralNetwork(object):
 
         # YOU IMPLEMENT YOUR feedforward HERE
 
-        # self.z1 =
-        # self.a1 =
-        # self.z2 =
-        # self.probs =
+        self.z1 = np.dot(X, self.W1) + self.b1
+        self.a1 = actFun(self.z1)
+        self.z2 = np.dot(self.a1, self.W2) + self.b2
+        self.probs = np.exp(self.z2) / np.sum(np.exp(self.z2), axis=1, keepdims=True)  # softmax(z)
         return None
 
     def calculate_loss(self, X, y):
@@ -124,8 +134,7 @@ class NeuralNetwork(object):
         # Calculating the loss
 
         # YOU IMPLEMENT YOUR CALCULATION OF THE LOSS HERE
-
-        # data_loss =
+        data_loss = np.sum(-np.log(self.probs[range(num_examples), y]))
 
         # Add regulatization term to loss (optional)
         data_loss += self.reg_lambda / 2 * (np.sum(np.square(self.W1)) + np.sum(np.square(self.W2)))
@@ -149,11 +158,18 @@ class NeuralNetwork(object):
         '''
 
         # IMPLEMENT YOUR BACKPROP HERE
-
+        num_examples = len(X)
+        tmp = self.probs
+        tmp[range(num_examples), y] -= 1
         # dW2 = dL/dW2
+        dW2 = np.dot(self.a1.T, tmp)
         # db2 = dL/db2
+        db2 = np.sum(tmp, axis=0, keepdims=True)
         # dW1 = dL/dW1
+        tmp2 = np.dot(tmp, self.W2.T) * self.diff_actFun(self.z1, type=self.actFun_type)
+        dW1 = np.dot(X.T, tmp2)
         # db1 = dL/db1
+        db1 = np.sum(tmp2, axis=0, keepdims=False)
         return dW1, dW2, db1, db2
 
     def fit_model(self, X, y, epsilon=0.01, num_passes=20000, print_loss=True):
@@ -200,14 +216,12 @@ class NeuralNetwork(object):
 def main():
     # generate and visualize Make-Moons dataset
     X, y = generate_data()
-    plt.scatter(X[:, 0], X[:, 1], s=40, c=y, cmap=plt.cm.Spectral)
-    plt.savefig('./task1_a.jpg')
-    plt.show()
+    # plt.scatter(X[:, 0], X[:, 1], s=40, c=y, cmap=plt.cm.Spectral)
+    # plt.show()
 
-
-    # model = NeuralNetwork(nn_input_dim=2, nn_hidden_dim=3 , nn_output_dim=2, actFun_type='tanh')
-    # model.fit_model(X,y)
-    # model.visualize_decision_boundary(X,y)
+    model = NeuralNetwork(nn_input_dim=2, nn_hidden_dim=3, nn_output_dim=2, actFun_type='tanh')
+    model.fit_model(X, y)
+    model.visualize_decision_boundary(X, y)
 
 
 if __name__ == "__main__":
