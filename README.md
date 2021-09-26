@@ -4,6 +4,6 @@
 | Items  | DDL |
 | ------------ | ----------- |
 | Assignment 0  |    9.15   |
-| Assignment 1   |         |
-| Assignment 2   |         |
-| Final Project   |         |
+| Assignment 1   |    9.29   |
+| Assignment 2   |     10.28    |
+| Final Project   |      12.3   |
