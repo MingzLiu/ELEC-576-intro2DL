@@ -149,7 +149,7 @@ class DeepNeuralNetwork(object):
         data_loss_single = -np.log(probs[range(num_examples), y])
         data_loss = np.sum(data_loss_single)
 
-        # Add regulatization term to loss (optional)
+        # Add L2 regulatization term to loss (optional)
         W_sum = 0
         for i in len(self.W):
             W_sum += np.sum(np.square(self.W[i]))
@@ -209,7 +209,7 @@ class DeepNeuralNetwork(object):
             # Backpropagation
             dW, db = self.backprop(X, y)
 
-            # Add regularization terms (b1 and b2 don't have regularization terms)
+            # Add regularization terms
             for i in range(len(dW)):
                 # print(dW[i].shape)
                 # print(self.W[i].shape)
@@ -242,7 +242,6 @@ def main():
     # plt.scatter(X[:, 0], X[:, 1], s=40, c=y, cmap=plt.cm.Spectral)
     # plt.show()
 
-    # model = NeuralNetwork(nn_input_dim=2, nn_hidden_dim=3 , nn_output_dim=2, actFun_type='tanh')
     model = DeepNeuralNetwork(nn_dims=[2, 3, 3, 2], actFun_type='tanh')
     model.fit_model(X, y)
     model.visualize_decision_boundary(X, y)
