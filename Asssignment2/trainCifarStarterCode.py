@@ -5,7 +5,7 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib as mp
 
-from Asssignment2 import plotFunc
+import plotFunc
 # --------------------------------------------------
 # setup
 
@@ -201,11 +201,16 @@ sess.close()
 
 # Plot the accuracy and loss under different parameters
 
-plotFunc.plotFunc(accs, losses, "1e-4 learning rate")
-plotFunc.plotFunc(accs, losses, "1e-3 learning rate")
-plotFunc.plotFunc(accs, losses, "1e-2 learning rate")
+# different learning rate
+
+# plotFunc.plotFunc(accs, losses, "1e-4 learning rate")
+# plotFunc.plotFunc(accs, losses, "1e-3 learning rate")
+# plotFunc.plotFunc(accs, losses, "1e-2 learning rate")
+
+# different optimizer
+
 # plotFunc.plotFunc(accs, losses, "AdamOptimizer")
-# plotFunc.plotFunc(accs, losses, "GradientDescentOptimizer")
+plotFunc.plotFunc(accs, losses, "GradientDescentOptimizer")
 
 # Plot the filters of the first layer
 fig = plt.figure()
@@ -216,7 +221,5 @@ for i in range(32):
 plt.show()
 
 # Calculate the statistics of the activations in the convolutional layers on test images.
-print("activation1: mean %g, variance %g" % (np.mean(np.array(activation1)), np.var(np.array(activation1))))
-print("activation2: mean %g, variance %g" % (np.mean(np.array(activation2)), np.var(np.array(activation2))))
 print("activation1: mean {}, variance {}".format(np.mean(np.array(activation1)), np.var(np.array(activation1))))
 print("activation2: mean {}, variance {}".format(np.mean(np.array(activation2)), np.var(np.array(activation2))))
