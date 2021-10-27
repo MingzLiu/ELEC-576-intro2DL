@@ -1,4 +1,4 @@
-from scipy import misc
+from imageio import imread
 import numpy as np
 import tensorflow as tf
 import random
@@ -6,6 +6,13 @@ import matplotlib.pyplot as plt
 import matplotlib as mp
 
 import plotFunc
+
+if tf.__version__.split(".")[0] == '2':
+    import tensorflow.compat.v1 as tf
+
+    tf.disable_v2_behavior()
+
+
 # --------------------------------------------------
 # setup
 
@@ -92,14 +99,14 @@ itest = -1
 for iclass in range(0, nclass):
     for isample in range(0, ntrain):
         path = './CIFAR10/Train/%d/Image%05d.png' % (iclass, isample)
-        im = misc.imread(path);  # 28 by 28
+        im = imread(path);  # 28 by 28
         im = im.astype(float) / 255
         itrain += 1
         Train[itrain, :, :, 0] = im
         LTrain[itrain, iclass] = 1  # 1-hot lable
     for isample in range(0, ntest):
         path = './CIFAR10/Test/%d/Image%05d.png' % (iclass, isample)
-        im = misc.imread(path);  # 28 by 28
+        im = imread(path);  # 28 by 28
         im = im.astype(float) / 255
         itest += 1
         Test[itest, :, :, 0] = im
@@ -150,17 +157,16 @@ h_fc2 = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 # loss
 # set up the loss, optimization, evaluation, and accuracy
 
-# cross_entropy = tf.losses.sparse_softmax_cross_entropy(labels=tf_labels, logits=h_fc2)
-cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=tf_labels, logits=h_fc2)
-# cross_entropy = tf.reduce_mean(cross_entropy)
-optimizer = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf_labels, logits=h_fc2)
+cross_entropy = tf.reduce_mean(cross_entropy)
+optimizer = tf.train.AdamOptimizer(1e-3).minimize(cross_entropy)
 correct_prediction = tf.equal(tf.argmax(h_fc2, 1), tf.argmax(tf_labels, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # --------------------------------------------------
 # optimization
 
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 batch_xs = np.zeros(
     (batchsize, imsize, imsize, nchannels))  # setup as [batchsize, width, height, numberOfChannels] and use np.zeros()
 batch_ys = np.zeros((batchsize, nclass))
@@ -168,7 +174,7 @@ batch_ys = np.zeros((batchsize, nclass))
 # setup as [batchsize, the how many classes]
 losses = []
 accs = []
-for i in range(10):  # try a small iteration size once it works then continue
+for i in range(3000):  # try a small iteration size once it works then continue
     perm = np.arange(ntrain * nclass)
     np.random.shuffle(perm)
     feed = {tf_data: batch_xs, tf_labels: batch_ys, keep_prob: 0.5}
@@ -198,17 +204,11 @@ print("test accuracy %g" % accuracy.eval(feed_dict=feed_test))
 
 sess.close()
 
-
 # Plot the accuracy and loss under different parameters
-
-# different learning rate
 
 # plotFunc.plotFunc(accs, losses, "1e-4 learning rate")
 # plotFunc.plotFunc(accs, losses, "1e-3 learning rate")
 # plotFunc.plotFunc(accs, losses, "1e-2 learning rate")
-
-# different optimizer
-
 # plotFunc.plotFunc(accs, losses, "AdamOptimizer")
 plotFunc.plotFunc(accs, losses, "GradientDescentOptimizer")
 
